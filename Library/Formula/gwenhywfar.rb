@@ -8,12 +8,13 @@ class Gwenhywfar <Formula
  depends_on 'pkg-config'
  depends_on 'gettext'
  depends_on 'gnutls'
-
   
   def install
     # llvm results in a sigsegfault during compile
     ENV.gcc_4_2
-    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
+    # configure needs to find pkg-config in PATH
+    ENV.prepend 'PATH', "#{HOMEBREW_PREFIX}/bin", ':'
+    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking", "--with-libgcrypt-prefix=#{HOMEBREW_PREFIX}"
     system "make install"
   end
 end
