@@ -13,7 +13,7 @@ class Aquaterm <Formula
     archs = []
     parch = `uname -p`.strip
     archs << parch
-    if `sysctl -n hw.cpu64bit_capable`.strip.to_i then
+    if Hardware.is_64_bit? then
       case parch
         when /ppc/
           archs << 'ppc64'
