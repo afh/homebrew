@@ -14,6 +14,7 @@ class Ledger <Formula
   homepage 'http://www.newartisans.com/software/ledger.html'
   head 'git://github.com/jwiegley/ledger.git', :branch => 'master'
 
+  depends_on 'gettext'
   depends_on 'boost'
   depends_on 'gmp'
   depends_on 'mpfr'
