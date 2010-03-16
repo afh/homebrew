@@ -265,14 +265,6 @@ begin
   when 'log'
     Dir.chdir HOMEBREW_REPOSITORY
     exec "git", "log", ARGV.formulae.first.path, *ARGV.options
-
-  when 'caveats'
-    require 'formula'
-    ARGV.formulae.each do |formula|
-      puts "#{formula.name} caveats:\n\n".upcase
-      puts formula.caveats || "none"
-      puts "#{'-' * 80}\n"
-    end
     
   when 'uses'
     # For each formula given, show which other formulas depend on it.
