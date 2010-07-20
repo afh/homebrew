@@ -1,10 +1,10 @@
 require 'formula'
 
 class Node <Formula
-  url 'http://s3.amazonaws.com/four.livejournal/20100120/node-v0.1.26.tar.gz'
+  url 'http://nodejs.org/dist/node-v0.1.100.tar.gz'
   head 'git://github.com/ry/node.git'
   homepage 'http://nodejs.org/'
-  md5 '8c65ce4bca6789d838401c29b41bcb58'
+  md5 'f8567739b71d05b8edcae1916d7e80cb'
 
   aka 'node.js'
 
@@ -15,7 +15,11 @@ class Node <Formula
   end
 
   def install
-    ENV.gcc_4_2
+    fails_with_llvm
+    inreplace %w{wscript configure} do |s|
+      s.gsub! '/usr/local', HOMEBREW_PREFIX
+      s.gsub! '/opt/local/lib', '/usr/lib'
+    end
     system "./configure", "--prefix=#{prefix}"
     system "make install"
   end

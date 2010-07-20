@@ -6,17 +6,13 @@ class Dtach <Formula
   homepage 'http://dtach.sourceforge.net/'
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
-    
     # Includes <config.h> instead of "config.h", so "." needs to be in the include path.
     ENV.append "CFLAGS", "-I."
-    
-    inreplace "Makefile" do |f|
-      # Use our own flags, thanks.
-      %w[CC CFLAGS LIBS].each { |flag| f.change_make_var! flag, "" }
-    end
-    
+
+    system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
+
     system "make"
     bin.install "dtach"
+    man1.install gzip("dtach.1")
   end
 end

@@ -14,7 +14,7 @@ class Slrn <Formula
         "--disable-debug",
         "--disable-dependency-tracking",
         "--with-ssl",
-        "--with-slang=#{HOMEBREW_PREFIX}"
+        "--with-slang=#{HOMEBREW_PREFIX}",
     ]
     system "./configure", *configure_args
     system "make all slrnpull"

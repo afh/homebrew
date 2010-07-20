@@ -1,13 +1,23 @@
 require 'formula'
 
 class Nginx < Formula
-  @url='http://sysoev.ru/nginx/nginx-0.7.62.tar.gz'
-  @homepage='http://nginx.net/'
-  @md5='ab22f1b7f098a90d803a3abb94d23f7e'
+  url 'http://nginx.org/download/nginx-0.7.67.tar.gz'
+  head 'http://nginx.org/download/nginx-0.8.45.tar.gz'
+  homepage 'http://nginx.org/'
+
+  unless ARGV.build_head?
+    md5 'b6e175f969d03a4d3c5643aaabc6a5ff'
+  else
+    md5 '26002367ee17d8be0b8b31e6cde95126'
+  end
 
   depends_on 'pcre'
 
+  skip_clean 'logs'
+
   def patches
+    # Changes default port to 8080
+    # Set configure to look in homebrew prefix for pcre
     DATA
   end
 
@@ -16,40 +26,38 @@ class Nginx < Formula
       ['--with-passenger', "Compile with support for Phusion Passenger module"]
     ]
   end
-    
-  def install
-    configure_args = [
-      "--prefix=#{prefix}",
-      "--with-http_ssl_module"
-    ]
-    
-    if ARGV.include? '--with-passenger'
+
+  def passenger_config_args
       passenger_root = `passenger-config --root`.chomp
-      
+
       if File.directory?(passenger_root)
-        configure_args << "--add-module=#{passenger_root}/ext/nginx"
-      else
-        puts "Unable to install nginx with passenger support. The passenger"
-        puts "gem must be installed and passenger-config must be in your path"
-        puts "in order to continue."
-        exit
+        return "--add-module=#{passenger_root}/ext/nginx"
       end
-    end
-    
-    system "./configure", *configure_args
-    system "make install"
-    
-    # FIXME: This fails, for an unknown reason
-    #(prefix+'logs').mkdir
+
+      puts "Unable to install nginx with passenger support. The passenger"
+      puts "gem must be installed and passenger-config must be in your path"
+      puts "in order to continue."
+      exit
   end
-  
+
+  def install
+    args = ["--prefix=#{prefix}", "--with-http_ssl_module", "--with-pcre",
+            "--conf-path=#{etc}/nginx/nginx.conf", "--pid-path=#{var}/run/nginx.pid",
+            "--lock-path=#{var}/nginx/nginx.lock"]
+    args << passenger_config_args if ARGV.include? '--with-passenger'
+
+    system "./configure", *args
+    system "make install"
+  end
+
   def caveats
     <<-CAVEATS
-You need to create a logs folder before you can run NginX. Also, in the
-interest of allowing you to run `nginx` without `sudo`, the default port is
-set to localhost:8080; if you want to host pages on your local machine to the
-public, you should probably change that to localhost:80, and run `nginx` with
-`sudo`.
+In the interest of allowing you to run `nginx` without `sudo`, the default
+port is set to localhost:8080.
+
+If you want to host pages on your local machine to the public, you should
+change that to localhost:80, and run `sudo nginx`. You'll need to turn off
+any other web servers running port 80, of course.
     CAVEATS
   end
 end
@@ -64,14 +72,14 @@ __END__
 +        if [ $ngx_found = no ]; then
 +
 +            # Homebrew
-+           HOMEBREW_PREFIX=${NGX_PREFIX%Cellar*}
++            HOMEBREW_PREFIX=${NGX_PREFIX%Cellar*}
 +            ngx_feature="PCRE library in ${HOMEBREW_PREFIX}"
 +            ngx_feature_path="${HOMEBREW_PREFIX}/include"
 +
 +            if [ $NGX_RPATH = YES ]; then
-+                ngx_feature_libs="-R#{HOMEBREW_PREFIX}/lib -L#{HOMEBREW_PREFIX}/lib -lpcre"
++                ngx_feature_libs="-R${HOMEBREW_PREFIX}/lib -L${HOMEBREW_PREFIX}/lib -lpcre"
 +            else
-+                ngx_feature_libs="-L#{HOMEBREW_PREFIX}/lib -lpcre"
++                ngx_feature_libs="-L${HOMEBREW_PREFIX}/lib -lpcre"
 +            fi
 +
 +            . auto/feature
@@ -84,10 +92,10 @@ __END__
 +++ b/conf/nginx.conf
 @@ -33,7 +33,7 @@
      #gzip  on;
- 
+
      server {
 -        listen       80;
 +        listen       8080;
          server_name  localhost;
- 
+
          #charset koi8-r;

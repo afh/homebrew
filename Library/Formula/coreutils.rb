@@ -1,6 +1,7 @@
 require 'formula'
 
-COREUTILS_ALIASES=<<-EOS
+def coreutils_aliases
+<<-EOS
 brew_prefix=`brew --prefix`
 alias base64="$brew_prefix/bin/gbase64"
 alias basename="$brew_prefix/bin/gbasename"
@@ -100,32 +101,41 @@ alias whoami="$brew_prefix/bin/gwhoami"
 alias yes="$brew_prefix/bin/gyes"
 alias '['="$brew_prefix/bin/g["
 EOS
+end
 
 class Coreutils <Formula
-  @url="http://ftp.gnu.org/gnu/coreutils/coreutils-7.5.tar.gz"
-  @md5='775351410b7d6879767c3e4563354dc6'
-  @homepage='http://www.gnu.org/software/coreutils'
+  url "http://ftp.gnu.org/gnu/coreutils/coreutils-8.5.tar.gz"
+  md5 'c1ffe586d001e87d66cd80c4536ee823'
+  homepage 'http://www.gnu.org/software/coreutils'
 
   def install
     # Note this doesn't work right now as I have broken the install process
     # slightly so it errors out.
     if ARGV.include? '--aliases'
-      puts COREUTILS_ALIASES
+      puts coreutils_aliases
       exit 0
     end
-    
-    system "./configure --prefix=#{prefix} --program-prefix=g"
+
+    args = [ "--prefix=#{prefix}" ]
+
+    unless ARGV.include? '--default-names'
+      args << "--program-prefix=g"
+    end
+
+    system "./configure", *args
     system "make install"
   end
 
-  def caveats; <<-EOS
+  def caveats
+    unless ARGV.include? '--default-names'; <<-EOS
 All commands have been installed with the prefix 'g'. In order to use these
 commands by default you can put some aliases in your bashrc. You can
 accomplish this like so:
 
     brew install coreutils --aliases >> ~/.bashrc
-    
+
 Please note the manpages are still referenced with the g-prefix.
     EOS
+    end
   end
 end

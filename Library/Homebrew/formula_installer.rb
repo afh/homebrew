@@ -10,7 +10,7 @@ class FormulaInstaller
 
   attr_writer :install_deps
 
-  def expand_deps f
+  def self.expand_deps f
     deps = []
     f.deps.collect do |dep|
       dep = Formula.factory dep
@@ -22,20 +22,32 @@ class FormulaInstaller
   
   def pyerr dep
     brew_pip = ' brew install pip &&' unless Formula.factory('pip').installed?
-    <<-EOS
-Unsatisfied dependency, #{dep}
-Homebrew does not provide formula for Python dependencies, pip does:
+    <<-EOS.dedent
+    Unsatisfied dependency, #{dep}
+    Homebrew does not provide formula for Python dependencies, pip does:
 
-   #{brew_pip} pip install #{dep}
-
+        #{brew_pip} pip install #{dep}
     EOS
   end
-  def plerr dep; <<-EOS
-Unsatisfied dependency, #{dep}
-Homebrew does not provide formula for Perl dependencies, cpan does:
+  def plerr dep; <<-EOS.dedent
+    Unsatisfied dependency, #{dep}
+    Homebrew does not provide formula for Perl dependencies, cpan does:
 
-    cpan -i #{dep}
-  
+        cpan -i #{dep}
+    EOS
+  end
+  def rberr dep; <<-EOS.dedent
+    Unsatisfied dependency "#{dep}"
+    Homebrew does not provide formulae for Ruby dependencies, rubygems does:
+
+        gem install #{dep}
+    EOS
+  end
+  def jrberr dep; <<-EOS
+Unsatisfied dependency "#{dep}"
+Homebrew does not provide formulae for JRuby dependencies, rubygems does:
+
+    jruby -S gem install #{dep}
     EOS
   end
 
@@ -43,24 +55,35 @@ Homebrew does not provide formula for Perl dependencies, cpan does:
     return unless f.external_deps
 
     f.external_deps[:python].each do |dep|
-      raise pyerr(dep) unless quiet_system "/usr/bin/python", "-c", "import #{dep}"
+      raise pyerr(dep) unless quiet_system "/usr/bin/env", "python", "-c", "import #{dep}"
     end
     f.external_deps[:perl].each do |dep|
-      raise plerr(dep) unless quiet_system "/usr/bin/perl", "-e", "use #{dep}"
+      raise plerr(dep) unless quiet_system "/usr/bin/env", "perl", "-e", "use #{dep}"
+    end
+    f.external_deps[:ruby].each do |dep|
+      raise rberr(dep) unless quiet_system "/usr/bin/env", "ruby", "-rubygems", "-e", "require '#{dep}'"
+    end
+    f.external_deps[:jruby].each do |dep|
+      raise rberr(dep) unless quiet_system "/usr/bin/env", "jruby", "-rubygems", "-e", "require '#{dep}'"
     end
   end
 
-  def install f
-    expand_deps(f).each do |dep|
+  def check_formula_deps f
+    FormulaInstaller.expand_deps(f).each do |dep|
       begin
-        check_external_deps f
         install_private dep unless dep.installed?
       rescue
         #TODO continue if this is an optional dep
         raise
       end
-    end if @install_deps
-    
+    end
+  end
+
+  def install f
+    if @install_deps
+      check_external_deps f
+      check_formula_deps f
+    end
     install_private f
   end
   
