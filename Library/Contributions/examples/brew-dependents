@@ -1,0 +1,15 @@
+#!/bin/sh
+
+for formula in $*; do
+  brew info "${formula}" >/dev/null
+  if [ 0 -ne $? ]; then
+    echo "No available formula for ${formula}"
+    continue
+  fi
+
+  echo "brews that depend on ${formula}:"
+  grep -R "depends_on.*${formula}" "$HOMEBREW_LIBRARY_PATH"/../Formula/ \
+    | cut -d: -f1 \
+    | xargs basename -s .rb \
+    | sed -e 's/^/  /'
+done
