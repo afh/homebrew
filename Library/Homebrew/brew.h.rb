@@ -91,14 +91,16 @@ class #{Formula.class_s name} <Formula
 <% end %>
 
   def install
-  <% if mode == :cmake %>
+<% if mode == :cmake %>
     system "cmake . \#{std_cmake_parameters}"
-  <% elsif mode == :autotools %>
-    system "./configure", "--prefix=\#{prefix}", "--disable-debug", "--disable-dependency-tracking"
-  <% else %>
-    system "./configure", "--prefix=\#{prefix}", "--disable-debug", "--disable-dependency-tracking"
+<% elsif mode == :autotools %>
+    system "./configure", "--disable-debug", "--disable-dependency-tracking",
+                          "--prefix=\#{prefix}"
+<% else %>
+    system "./configure", "--disable-debug", "--disable-dependency-tracking",
+                          "--prefix=\#{prefix}"
     # system "cmake . \#{std_cmake_parameters}"
-  <% end %>
+<% end %>
     system "make install"
   end
 end
@@ -618,8 +620,4 @@ def llvm_build
     `#{xcode_path}/usr/bin/llvm-gcc -v 2>&1` =~ /LLVM build (\d{4,})/
     $1.to_i
   end
-end
-
-def x11_installed?
-  Pathname.new('/usr/X11/lib/libpng.dylib').exist?
 end

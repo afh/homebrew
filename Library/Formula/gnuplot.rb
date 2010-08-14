@@ -13,6 +13,14 @@ class Gnuplot <Formula
   depends_on 'jpeg' => :optional
   depends_on 'aquaterm' => :optional
 
+  def options
+    [
+      ["--pdf", "Build with pdf support."],
+      ["--without-lua", "Build without lua support."],
+      ["--nogd", "Build without gd support."]
+    ]
+  end
+
   def install
     ENV.x11
     args = ["--disable-debug", "--disable-dependency-tracking",
