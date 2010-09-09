@@ -18,9 +18,6 @@ class Gd <Formula
     system "./configure", "--prefix=#{prefix}", "--with-freetype=/usr/X11"
     system "make install"
     (lib+'pkgconfig').install "gdlib.pc"
-    # Other software may look for gd or libgd instead of gdlib using pkg-config
-    # symlinking the .pc file remedies the problem
-    #File.symlink (lib+'pkgconfig'+'gdlib.pc'), (lib+'pkgconfig'+'gd.pc')
   end
 end
 

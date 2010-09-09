@@ -6,14 +6,15 @@ class Mcabber <Formula
   md5 '97faad2154a87da9329d51db957f9024'
   head 'http://mcabber.com/hg/'
 
+  depends_on 'pkg-config'
   depends_on 'glib'
   depends_on 'loudmouth'
   depends_on 'gpgme'
   depends_on 'libgcrypt'
-  depends_on 'aspell' => :optional
-  depends_on 'enchant' => :optional
-  depends_on 'libotr' => :optional
-  depends_on 'libidn' => :optional
+  depends_on 'aspell'  => :optional if ARGV.include? '--enable-aspell'
+  depends_on 'enchant' => :optional if ARGV.include? '--enable-enchant'
+  depends_on 'libotr'  => :optional if ARGV.include? '--enable-otr'
+  depends_on 'libidn'  => :optional
 
   def options
     [
@@ -24,9 +25,8 @@ class Mcabber <Formula
   end
 
   def install
-    args = ["--prefix=#{prefix}",
-            "--disable-debug",
-            "--disable-dependency-tracking"]
+    args = ["--disable-debug", "--disable-dependency-tracking",
+            "--prefix=#{prefix}"]
 
     args << "--enable-aspell" if ARGV.include? "--enable-aspell"
     args << "--enable-enchant" if ARGV.include? "--enable-enchant"
@@ -35,7 +35,6 @@ class Mcabber <Formula
     system "./configure", *args
     system "make install"
 
-    (share+'mcabber').install('mcabberrc.example')
-    (share+'mcabber').install('contrib')
+    (share+'mcabber').install %w[mcabberrc.example contrib]
   end
 end
