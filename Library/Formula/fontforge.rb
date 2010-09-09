@@ -14,11 +14,20 @@ class Fontforge <Formula
     system "./configure", "--enable-double",
                           "--without-freetype-bytecode", "--without-python",
                           "--prefix=#{prefix}"
+    inreplace "Makefile" do |s|
+      s.gsub! "/Applications", "$(prefix)"
+      s.gsub! "/usr/local/bin", "$(bindir)"
+    end
     system "make"
     system "make install"
   end
 
   def caveats
-    "'fontforge' is an X11 application."
+    <<-EOS.undent
+    fontforge is an X11 application.
+
+    To install the Mac OS X wrapper application run the following command:
+    sudo ln -s #{prefix}/FontForge.app /Applications
+    EOS
   end
 end
