@@ -40,6 +40,7 @@ class Aspell <Formula
   end
 
   # TODO remove when options works properly
+  def caveats; <<-EOS
     Dictionaries are not automatically installed, please specify the languages
     for which you want dictionaries to be installed with the --lang option, e.g:
     % brew install aspell --lang=en,es
