@@ -40,8 +40,6 @@ class Aspell <Formula
   end
 
   # TODO remove when options works properly
-  def caveats
-    <<-EOS.undent
     Dictionaries are not automatically installed, please specify the languages
     for which you want dictionaries to be installed with the --lang option, e.g:
     % brew install aspell --lang=en,es
@@ -416,6 +414,7 @@ class Aspell_zu <AspellLang
   url 'http://ftp.gnu.org/gnu/aspell/dict/zu/aspell-zu-0.50-0.tar.bz2'
   md5 '2478cbbb6abaf5ed74bc2da7e7152116'
 end
+
 def available_languages
   %w( af am ar ast az be bg bn br ca cs csb cy da de de_alt el en eo es et fa fi fo fr fy ga gd gl grc gu gv he hi hil hr hsb hu hy ia id is it ku ky la lt lv mg mi mk ml mn mr ms mt nb nds nl nn ny or pa pl pt_BR pt_PT qu ro ru rw sc sk sl sr sv sw ta te tet tk tl tn tr uk uz vi wa yi zu)
 end
