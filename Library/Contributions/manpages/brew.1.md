@@ -44,6 +44,9 @@ didn't include with OS X.
   * `install [--force] [--debug] [--use-llvm] [--ignore-dependencies] [--HEAD]` <formula>:
     Installs <formula>.
 
+    <formula> is usually the name of the formula to install, but may also be
+    the URL for an arbitrary formula.
+
     If `--force` is passed, will install <formula> even if it is already
     installed. This can be used to re-install a formula without removing
     it first.
@@ -61,9 +64,13 @@ didn't include with OS X.
     If `--HEAD` is passed, and <formula> defines it, install the HEAD version,
     aka master, trunk, unstable, dev.
 
+    To install a newer version of HEAD use
+    `brew rm <foo> && brew install --HEAD <foo>`
+    or `brew --force --HEAD <foo>`.
+
   * `install --interactive [--git]` <formula>:
-    Downloads and patches <formula>, and then opens a shell. This allows the
-    user to run `./configure --help` and otherwise determine how to turn the
+    Downloads and patches <formula>, then opens a shell. This allows the user
+    to run `./configure --help` and otherwise determine how to turn the
     software package into a Homebrew formula.
 
     If `--git` is passed, Homebrew will create a Git repository, useful for
@@ -95,8 +102,11 @@ didn't include with OS X.
   * `home` <formula>:
     Opens a browser to <formula>'s homepage.
 
-  * `rm`, `remove` <formula>:
+  * `rm`, `remove [--force]` <formula>:
     Uninstalls <formula>.
+
+    If `--force` is passed, and there are multiple versions of <formula>
+    installed, deletes all installed versions.
 
   * `create [--cache]` <URL>:
     Generates a formula for the downloadable file at <URL> and opens it in
@@ -117,7 +127,7 @@ didn't include with OS X.
   * `edit`:
     Opens all of Homebrew for editing in TextMate.
 
-  * `link` <formula>:
+  * `ln`, `link` <formula>:
     Symlinks all of <formula>'s installed files into the Homebrew prefix. This
     is done automatically when you install formula. It is useful for DIY
     installation, or in cases where you want to swap out different versions of
@@ -143,8 +153,7 @@ didn't include with OS X.
     Shows the formulas that specify <formula> as a dependency. The list is
     not recursive; only one level of dependencies is resolved.
 
-    If `--installed` is passed, the list only shows formulae you have
-    installed.
+    If `--installed` is passed, only lists installed formulae.
 
   * `doctor`:
     Checks your system for potential problems.
@@ -160,6 +169,20 @@ didn't include with OS X.
     Using Git, fetches the newest version of Homebrew from the GitHub
     repository.
 
+  * `log [git-options]` <formula> ...:
+    Shows the git log for the given formulae. Options that `git log`
+    recognizes can be passed before the formula list.
+
+  * `fetch [--force] [-v] [--HEAD]` <formula>:
+    Downloads the tarball or checks out from VCS for the given <formula>. For
+    tarballs, also prints MD5 and SHA1 checksums.
+
+    If `--HEAD` is passed, download the HEAD version of <formula> instead. `-v`
+    may also be passed to make the VCS checkout verbose, useful for seeing if
+    an existing HEAD cache has been updated.
+
+    If `--force` is passed, remove a previously cached version and re-fetch.
+
 ## EXTERNAL COMMANDS
 
 Homebrew allows external commands to be defined by putting a +x file named
@@ -168,13 +191,12 @@ to recognize `brew cmdname`.
 
 Some external commands are shipped with Homebrew, and enabled by default.
 
-  * `audit`:
+  * `audit [--warn]`:
     Checks all formulae for Homebrew coding style violations. This should be
     run before submitting a new formula for inclusion.
 
-  * `fetch` <formula>:
-    Downloads the tarball or checks out from VCS for the given <formula>. For
-    tarballs, also prints MD5 and SHA1 checksums.
+    If `--warn` is passed, performs additional stricter checks that may not need
+    to be fixed before submitting.
 
   * `options` <formula>:
     Displays install options specific to <formula>.
@@ -260,6 +282,21 @@ Some external commands are shipped with Homebrew, and enabled by default.
   * HOMEBREW\_VERBOSE:
     If set, instructs Homebrew to always assume `--verbose` when running
     commands.
+
+## USING HOMEBREW BEHIND A PROXY
+
+Homebrew uses several commands for downloading files (e.g. curl, git, svn).
+Many of these tools can download via a proxy. It's common for these tools
+to read proxy parameters from environment variables.
+
+For the majority of cases setting `http_proxy` is enough. You can set this in
+your shell profile, or you can use it before a brew command:
+
+    http_proxy=http://<host>:<port> brew install foo
+
+If your proxy requires authentication:
+
+    http_proxy=http://<user>:<password>@<host>:<port> brew install foo
 
 ## SEE ALSO
 
