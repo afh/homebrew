@@ -39,10 +39,10 @@ class AbstractDownloadStrategy
 end
 
 class VCSDownloadStrategy < AbstractDownloadStrategy
-  def initialize name, resource
-    super
+  def initialize name, resource, clone=nil
+    super name, resource
     @ref_type, @ref = destructure_spec_hash(resource.specs)
-    @clone = HOMEBREW_CACHE/cache_filename
+    @clone = clone || HOMEBREW_CACHE/cache_filename
   end
 
   def destructure_spec_hash(spec)
@@ -458,6 +458,10 @@ class GitDownloadStrategy < VCSDownloadStrategy
     end
   end
 
+  def repo_valid?
+    quiet_system "git", "--git-dir", git_dir, "status", "-s"
+  end
+
   private
 
   def git_dir
@@ -474,10 +478,6 @@ class GitDownloadStrategy < VCSDownloadStrategy
 
   def host_supports_depth?
     @url =~ %r{git://} or @url =~ %r{https://github.com/}
-  end
-
-  def repo_valid?
-    quiet_system "git", "--git-dir", git_dir, "status", "-s"
   end
 
   def submodules?
@@ -612,6 +612,8 @@ class MercurialDownloadStrategy < VCSDownloadStrategy
       #{HOMEBREW_PREFIX}/opt/mercurial/bin/hg
       #{HOMEBREW_PREFIX}/share/python/hg
       ].find { |p| File.executable? p }
+    onoe "Mercurial is not installed!" unless @path and not @path.empty?
+    @path
   end
 
   def fetch
@@ -659,6 +661,8 @@ class BazaarDownloadStrategy < VCSDownloadStrategy
       #{which("bzr")}
       #{HOMEBREW_PREFIX}/bin/bzr
       ].find { |p| File.executable? p }
+    onoe "Bazaar is not installed!" unless @path and not @path.empty?
+    @path
   end
 
   def repo_valid?
@@ -702,6 +706,8 @@ class FossilDownloadStrategy < VCSDownloadStrategy
       #{which("fossil")}
       #{HOMEBREW_PREFIX}/bin/fossil
       ].find { |p| File.executable? p }
+    onoe "Fossil is not installed!" unless @path and not @path.empty?
+    @path
   end
 
   def fetch
